@@ -31,7 +31,12 @@ hs_err_pid*
 
 
 # Maven
+.classpath
+.project
+.settings/
+target/
 */target/*
+*/target/**
 
 # Eclipse
 .metadata
