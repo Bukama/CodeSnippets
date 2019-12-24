@@ -1,2 +1,2 @@
-# CodeSnippest
+# CodeSnippets
 Just some code snippets
