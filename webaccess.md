@@ -6,6 +6,7 @@
 * [W3C: Web Contect Accessbility Guidelines (WCAG) 2.0](https://www.w3.org/TR/WCAG20/)
 * [W3C: Web Contect Accessbility Guidelines (WCAG) 2.1](https://www.w3.org/TR/WCAG21/)
 * [bitv-lotse.de (BM f Arbeit und Soziales): Das Konzept der WCAG 2.0 und der BITV 2.0](http://www.bitv-lotse.de/BL/DE/1_Einfuehrung/1_3_Konzept/1_3_konzept_node.html)
+* [W3C: Accessible Rich Internet Applications (WAI-ARIA) 1.1.](https://www.w3.org/TR/wai-aria/)
 
 ## Checklisten, Unterschiede etc.
 * [accessibility-checklist.ch: Checkliste für WCAG 2.0](https://www.accessibility-checklist.ch/)
@@ -16,6 +17,9 @@
 * [W3C: Design and Develop Overview for Web Accessibility](https://www.w3.org/WAI/design-develop/)
 * [W3C: Web Accessibility Tutorials](https://www.w3.org/WAI/tutorials/)
 * [(Übersetzung von W3C): Wie man WCAG 2.0 erfüllt](https://www.einfach-fuer-alle.de/wcag2.0/uebersetzungen/How-to-Meet-WCAG-2.0/)
+* [W3C: How to Meet WCAG (Quick Reference)](https://www.w3.org/WAI/WCAG21/quickref/?versions=2.0)
+* [W3C: Using ARIA](https://w3c.github.io/using-aria/)
+
 
 # Entwicklung
 
