@@ -23,4 +23,8 @@ git reset --hard upstream/master
 git push origin master -f
 ```
 
+**Weitere Infos**
+
+* [GitHub Helppage](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/working-with-forks)
+
 
