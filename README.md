@@ -1,5 +1,5 @@
-# CodeSnippets, Links and other usefull stuff
-I use this repository as a notepad to collect noteable links, code snippets
+# CodeSnippets, links and other useful stuff
+I use this repository as a notepad to collect notable links, code snippets
 and other useful stuff about software development and testing.
 
 Note: Maybe German ;)
