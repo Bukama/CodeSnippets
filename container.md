@@ -83,9 +83,15 @@ This section contains several links to guides and blogs about how to (best) crea
 * [Docker documentation](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)
 * [Full Dockerfile reference](https://docs.docker.com/engine/reference/builder/)
 
+### Docker image layers
+
+What are layers? How to create and use them?
+
+
+
 ### Share images
 
-**TODO**: Nexus? 
+[Nexus can be used as a Docker repository](https://help.sonatype.com/repomanager3/formats/docker-registry) also, like a repository for Maven artefacts.
 
 
 ## Conclusion
