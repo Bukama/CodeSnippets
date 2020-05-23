@@ -37,7 +37,9 @@ _from [Docker curriculum](https://docker-curriculum.com/#why-use-containers-)_
 
 _from [Docker documentation - Part 1: Orientation and setup](https://docs.docker.com/get-started/)_
 
-> Docker is a platform for developers and sysadmins to build, run, and share applications with containers. The use of containers to deploy applications is called containerization. Containers are not new, but their use for easily deploying applications is.
+> Docker is a platform for developers and sysadmins to build, run, and share applications with containers.
+> The use of containers to deploy applications is called containerization.
+> Containers are not new, but their use for easily deploying applications is.
 > 
 > Containerization is increasingly popular because containers are:
 >  
@@ -59,7 +61,10 @@ Install `Docker Desktop`, see
 
 ### CI-Server (Linux)
 
-**TODO**: How to use Docker on a "naked" linux CI-Server
+Depending on the derivative.
+The [Docker install server section](https://docs.docker.com/engine/install/#server) lists all supported derivatives, e.g. for [Ubuntu](https://docs.docker.com/engine/install/ubuntu/) there are `apt-get` commands.
+
+
 
 ## Creating Docker images
 
@@ -93,8 +98,9 @@ _from [Docker documentation](https://docs.docker.com/develop/develop-images/dock
 This means that every command in a dockerfile is stored as a layer.
 Layers can be reused, which reduces needed storage space.
 
-Understandable description of Docker layers: [Blog: Digging into Docker layers](https://medium.com/@jessgreb01/digging-into-docker-layers-c22f948ed612)
+ 
 
+Understandable description of Docker layers: [Blog: Digging into Docker layers](https://medium.com/@jessgreb01/digging-into-docker-layers-c22f948ed612)
 
 ### Share images
 
@@ -103,9 +109,23 @@ Understandable description of Docker layers: [Blog: Digging into Docker layers](
 
 ## Conclusion
 
-
+A (Docker) container is a less resource intensive, isolated VM-like sandbox, exactly it's a running process, but with it's own file system!
+The content of a container (the programs installed, e.g. a webserver) is defined in a dockerfile.
 
 The information about exposing a service etc. (e.g. the port) inside the container and to the "outer world" needs to be configured when starting the image.
+
+
+## Additional links
+
+* [Blog about building a CI/CD Pipeline Using Docker](https://www.taniarascia.com/continuous-integration-pipeline-docker/) with much steps "I learned during doing this"
+
+
+
+# Developing
+
+Personal goal is to develop JavaEE / JakartaEE applications and use containers at least for testing, but maybe for more.
+
+## Using layers
 
 
 
