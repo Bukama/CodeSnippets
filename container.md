@@ -85,8 +85,15 @@ This section contains several links to guides and blogs about how to (best) crea
 
 ### Docker image layers
 
-What are layers? How to create and use them?
+_from [Docker documentation](https://docs.docker.com/develop/develop-images/dockerfile_best-practices/)_
 
+> A Docker image consists of read-only layers each of which represents a Dockerfile instruction.
+> The layers are stacked and each one is a delta of the changes from the previous layer. 
+
+This means that every command in a dockerfile is stored as a layer.
+Layers can be reused, which reduces needed storage space.
+
+Understandable description of Docker layers: [Blog: Digging into Docker layers](https://medium.com/@jessgreb01/digging-into-docker-layers-c22f948ed612)
 
 
 ### Share images
