@@ -7,6 +7,7 @@
 * [W3C: Web Contect Accessbility Guidelines (WCAG) 2.1](https://www.w3.org/TR/WCAG21/)
 * [bitv-lotse.de (BM f Arbeit und Soziales): Das Konzept der WCAG 2.0 und der BITV 2.0](http://www.bitv-lotse.de/BL/DE/1_Einfuehrung/1_3_Konzept/1_3_konzept_node.html)
 * [W3C: Accessible Rich Internet Applications (WAI-ARIA) 1.1.](https://www.w3.org/TR/wai-aria/)
+* [Gesetzestexte EN 301 549 (bei ETSI ICT Standards)](https://www.etsi.org/standards#page=1&search=301549&title=1&etsiNumber=1&content=1&version=0&onApproval=1&published=1&historical=1&startDate=1988-01-15&endDate=2020-02-18&harmonized=0&keyword=&TB=&stdType=&frequency=&mandate=&collection=&sort=1)
 
 ## Checklisten, Unterschiede etc.
 * [accessibility-checklist.ch: Checkliste für WCAG 2.0](https://www.accessibility-checklist.ch/)
