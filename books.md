@@ -7,6 +7,7 @@ Listed in lexicographical order of their (first) author name.
 
 * Cooper, Reimann, Cronin - About Face: The Essentials of Interaction Design [Amazon](https://www.amazon.de/About-Face-Essentials-Interaction-Design/dp/1118766571)
 * Martin Fowler - Refactoring [Amazon](https://www.amazon.de/Refactoring-Improving-Existing-Addison-wesley-Signature/dp/0134757599)
+* Trisha Gee, Kevlin Henney - 97 Things Every Java Programmer Should Know [Amazon](https://www.amazon.de/Things-Every-Java-Programmer-Should/dp/1491952695)
 * Simon Harrer - Java by Comparison (_I put it under "General" as the code examples are Java, but the essentials are language independent - like in the other books listed here. Simon [mentioned](https://twitter.com/simonharrer/status/1211592871645720576) he would name the book something like "Cleaner Code by Comparison" today_) [Amazon](https://www.amazon.de/Java-Comparison-Become-Craftsman-Examples/dp/1680502875)
 * Kemper, Eickler - Datenbanksysteme [Amazon](https://www.amazon.de/Datenbanksysteme-Eine-Einf%C3%BChrung-Alfons-Kemper/dp/3486576909)
 * Robert Martin - Clean Code [Amazon](https://www.amazon.de/Clean-Code-Handbook-Software-Craftsmanship/dp/0132350882)
@@ -18,9 +19,14 @@ Listed in lexicographical order of their (first) author name.
 
 ## Java
 
+* Sebastian Daschner - Architecting Modern Java EE Application [Amazon](https://www.amazon.de/Architecting-Modern-Java-Applications-business-oriented/dp/1788393856)
 * Thorben Janssen - Hibernate Tips: More than 70 solutions to common Hibernate problems [Amazon](https://www.amazon.de/Hibernate-Tips-solutions-common-problems/dp/1544869177)
 * Vlad Milhalcea - High Performance Java Persistence [Amazon](https://www.amazon.de/High-Performance-Java-Persistence-Vlad-Mihalcea/dp/973022823X)
 * Nicolai Parlog - The Java Module System [Manning Publication](https://www.manning.com/books/the-java-module-system), [Amazon](https://www.amazon.de/Java-Module-System-Nicolai-Parlog/dp/1617294284)
 
 
+## Testing
+
+* Arnon Axelrod - Complete Guide to Test Automation [Amazon](https://www.amazon.de/Complete-Guide-Test-Automation-Maintaining/dp/1484238311)
+* Alex Soto Bueno, Andy Gumbrecht, Jason Porter - Testing Java Microservices [Amazon](https://www.amazon.de/Testing-Java-Microservices-Alex-Bueno/dp/1617292893)
 
