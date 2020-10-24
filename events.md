@@ -5,8 +5,8 @@ Often processes rely on other processes' outcome and are therefore event-driven.
 One tool, often used for this, is [Apache Kafka](https://kafka.apache.org/).
 
 As far as I understood _Kafka_'s way of working, I'm not sure if it is a real substitution for the system at my work.
-On my work we use a very old, vendor specific solution (see ["Current scenario" section](#current-scenario)), and I'm convinced that we need to migrate to a modern environment / tech-stack. 
-I don't know if someone, especially from management, shares my opinion, but I learned that you should not just make something bad, without being able to present a better and valid solution.
+On my work we use a very old, vendor specific solution (see ["Current scenario" section](#current-scenario)), and I'm convinced that we need to migrate to a modern environment / tech-stack, especially because the system has to process several hundred millions events - sometimes in only a few days. 
+I don't know if someone, especially from management, shares my opinion, but I learned that you should not just blame something bad, without being able to present a better and valid solution.
  
 Therefore, I want to investigate this and find out which possibilities we have.
 I will describe our current situation and then investigate if and maybe how it can be transformed into _Kafka_ or if there is another, more fitting solution.
@@ -24,11 +24,11 @@ First I want to describe the steps of the process, without going into functional
 1. At the beginning the system retrieves XML-files with up to 50.000 single elements, which are stored as-is in the database.
 2. A component searches for new stored files and adds their primary key to a JMS-queue.
 3. The component which consumes those JMS-messages then loads the XML, unmarshalls it, does some validation which can't be done using XSD (e.g. is the sender allowed to send such a file), and if everything is fine stores the 50.000 single elements in a structured (database normalization) form.
-4. For each element an entry in a so called "_EventStore_" (see below) is created and picked up by the first "action" (don't want to use the word process here) of the process engine.
+4. For each element a stored procedure inside, triggered by a database job, creates an entry in a so called "_EventStore_" (see [section about Eventstores](#eventstores-based-on-_jca_-and-_as_)), which is created and picked up by the first workflow of the process engine.
 5. The process engine picks up a single element, performs further, single element based validation and again stores the result in the database.
    Again entries in two (let's assume the element was valid) _EventStore_ are made for further processing. 
-6. The second actions picks up results of the overall validation or of all single elements of a received XML-File (see step 1) and creates an XML-file including the result, which is transmitted back to the sender as an answer to the received file.
-7. Parallel to the second action, a third one picks up the data of a valid single element, extracts some values out of it and applies them to the "storage" the system where other components can access the data.
+6. The second workflow picks up results of the overall validation or of all single elements of a received XML-File (see step 1) and creates an XML-file including the result, which is transmitted back to the sender as an answer to the received file.
+7. Parallel to the second workflow, a third one picks up the data of a valid single element, extracts some values out of it and applies them to the "storage part" the system where other components can access the data.
 
 As you can see process is cut into short, single steps, with the result of each step is stored into the database.
 This has following advantages:
@@ -62,10 +62,11 @@ The predecessor _WPS_ only supported _tWAS 8.0_ with _Java 1.7_.
 ## Motivation for modernization
 
 There are a bunch of things which make me want to modernize.
+Many developers won't be surprised that almost all things point to lightweight application servers to increase productivity.
 
-* _tWAS 9.0.0.x_ does not get any updates anymore, only _tWAS 9.0.5.x_ (which can be used with a _Liberty_ core) is supported, but our operations department does not offer that versions.
 * The IBM JDK is not developed anymore, because IBM joined the circle of firms, which support _AdoptOpenJDK_.
   There is still support yet, but it will end in a few years, and as said no Java 9+ will be provided.
+* _tWAS 9.0.0.x_ does not get any updates anymore, only _tWAS 9.0.5.x_ (which can be used with a _Liberty_ core) is supported, but our operations department does not offer that versions.
 * The supported _JavaEE_ version of both servers, _tWAS 9.0.0.x_ and _BAW19_, are long outdated and libraries / APIs are not supported anymore.
   For example _Hibernate 4.2.21_ is the last supported _Hibernate_ version which only requires _JPA 2.0_ (_JavaEE 6_), but due bugs in the _BAW19_ only an even older version (_4.2.3_) works without issues.
   As a comparison: Currently the _Hibernate_ team has already released version _6.0.0.Alpha_.
@@ -94,13 +95,15 @@ In this section I want to take a short look into the solutions we currently use 
 The _Java Message Service (JMS)_ provides message queueing and publish-subscribe technology.
 At my work we use _JMS_ in the message queueing style to distribute events automatically inside the cluster.
 So every node can pick up a new message after it has finished.
+In our setup those messages only contain the primary key of the related object (here XML file).
 A retry mechanism is also supported:
 When a consuming component fails during processing a message, it can add the message back to the queue.
+
 
 On the other hand:
 As the component, which fills the queue, is also running on every node, we implemented a mechanism which blocks the other nodes, so only one node searches for new files (see [process step 2](#process-description)) at a time.
 That means that even if one node drops out, the queue gets still filled.
-In a containerized environment you could just deploy one replica of this "providing" instance and _Kubernetes_ would take care that there is always one running container.
+In a containerized environment you could just deploy one replica of this "providing" instance and _Kubernetes_ would take care that there is always one running container of that.
 
 Another downside of queues is that the actual queues objects are somehow not connected to your system.
 Because of that, in our environment we check, if the related object (here XML file) has already been processed, right after the messages has been put out of the queue.
@@ -113,7 +116,53 @@ The _JMS_ takes away much work from you by providing an automated distribution a
 It fits into our environment very well, where we have strong cuts between the processing steps.
 
 
-## JCA - EventStores
+## EventStores based on _JCA_ and _AS_
+
+To start a workflow you can use the combination of an _ActivationSpec (AS)_ with a JDBC based JCA resource adapter, which is shipped within the _BAW19_.
+In this approach a JDBC-AS will trigger every x seconds, tries to read up to y rows from a so called _EventStore_.
+For every row a defined workflow business flow is called.
+
+### The _EventStore_ table
+
+An _EventStore_ is a database table with a fixed column definition, which is shown below.
+
+**TODO IMAGE**
+
+Important columns are the following:
+
+* **object_id**: This column contains the primary key of an object (e.g. one single element which should be validated - see [process step 5](#process-description))
+* **object_name**: In this column serves the identifier what workflow should be called.
+  In general, you can use an _EventStore_ for as multiple workflows, but in our performance test we found out that you should provide individual _EventStores_ if you process a huge amount of events
+* **event_status**: This column represents the current status of the event
+  It may contain the following values: 0 (outstanding), 1 (done - row gets deleted), 3 (in process), -1 (failed after maximum numbers of retries)
+* **connector_id**: Identifier, which allows an _ActivationSpec_ to only select rows with a specific value, e.g. a node name
+
+### The _ActivationSpec_ definition
+
+The _ActivationSpec_ configuration takes a bunch of settings, whereas the most important are:
+
+* The table name of the related _EventStore_
+* The polling information (maximum connections, interval, and quantity)
+* Identifier to select only entries where the value matches the column "_connector_id_" of the related _EventStore_.
+  We put the node's name into that to distribute events to selected nodes
+* The maximum number of retries (if any), until a failing event is finally declared as failed
+
+### Example
+
+The following example shall visualize the setup.
+Let's assume there are two _EventStores_ (E1 and E2) and three _ActivationSpecs_ (A1, A2, A3).
+
+* A1 reads entries from E1 and calls the workflow W1
+* A2 reads entries from E2 and calls the workflow W2
+* A3 also reads entries from E2, but calls the workflow W3
+
+Furthermore, let's assume the cluster contains three servers (S1, S2, S3).
+If the entries of E1 and E2 would look like shown below, the **TODO** 
+
+** TODO TABELLE**
+
+### _EventStores_: Pro's and con's
+
 
 # Kafka
 
