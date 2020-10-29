@@ -30,7 +30,7 @@ First I want to describe the steps of the process, without going into functional
 6. The second workflow picks up results of the overall validation or of all single elements of a received XML-File (see step 1) and creates an XML-file including the result, which is transmitted back to the sender as an answer to the received file.
 7. Parallel to the second workflow, a third one picks up the data of a valid single element, extracts some values out of it and applies them to the "storage part" the system where other components can access the data.
 
-As you can see process is cut into short, single steps, with the result of each step is stored into the database.
+As you can see, the process is cut into short, single steps, and the result of each step is stored inside the database.
 This has following advantages:
 * Some later steps are only processed if a previous step was successful, e.g. step 4 is only done if step 3 was successful
 * Short running steps / methods
@@ -223,7 +223,27 @@ This should not be too difficult (e.g. with timers and [SQL SKIP LOCK](https://v
 Maybe other adapters already exist and can be used in a standard Java Enterprise scenario.
 
 
-## Kafka
+## CQRS & Kafka
+
+### CQRS
+_Note: This section is based on the corresponding section of Sebastian Daschner's book "Architecting Modern Java EE Applications"_.
+
+The _Command Query Responsibility Segregation (CQRS)_ is an event-driven architecture based on event sourcing.
+An action that changes system's state (writes) is called a _command_, while an action that does not change the system's (read) is a _query_.
+In a _CQRS_ architecture every action must either be a command or a query, therefore only command system can create events, while both can consume them.
+The only connection between command and query services is an event store or event hub, which would be similar to the central database in a _Create Read Update Delete (CRUD)_-based system.
+The communication between services and the event hub is done via interfaces, often REST-like HTTP services.
+
+Each system represents the current state of its domain entities, but not the whole history of its state.
+The event hub is the only source which contains all atomic events.
+Because of that, _CQRS_ allows every service to scale individually, especially query services.
+
+When the event hub is not available, command services can't store events in it.
+This is similar to a traditional _CRUD_-based system and keeps the system from changing its state.
+In contrast to that, even when the event hub is not available, the query services in a _CQRS_ system are still fully available and provide correct results, because they store the current state of their domain entities.
+That is not true in a CRUD-based system, because the query services can't access the database.
+
+### Kafka
 
 
-## Summary 
+# Summary 
