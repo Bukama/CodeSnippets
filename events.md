@@ -2,13 +2,13 @@
 
 Modern architectures rely on short running processes.
 Often processes rely on other processes' outcome and are therefore event-driven.
-One tool, often used for this, is [Apache Kafka](https://kafka.apache.org/).
+One tool, which name comes up in those scenarios, is [Apache Kafka](https://kafka.apache.org/).
 
 As far as I understood _Kafka_'s way of working, I'm not sure if it can be a real substitution for the system at my work, especially when taking migration effort into account.
 On my work we use a very old, vendor specific solution (see ["Current scenario" section](#current-scenario)), and I'm convinced that we need to migrate to a modern environment / tech-stack, especially because the system has to process several hundred millions events - sometimes in only a few days. 
 I don't know if someone, especially from management, shares my opinion, but I learned that you should not just blame something bad, without being able to present a better and valid solution.
  
-Therefore, I want to investigate _Kafka_ and find out if we can/should use it without having to reimplement the whole system.
+Therefore, I want to investigate _Kafka_ and find out if we can/should use it without having to reimplement the whole system (amount of resources is far from where it should be).
 I will describe our current system / situation, the motivation for modernization, and then investigate if and maybe how it can be transformed into _Kafka_ or if there is another, more fitting solution.
 
 # Current scenario
@@ -63,7 +63,7 @@ There are a bunch of things which make me want to modernize.
 Many developers won't be surprised that almost all things point to lightweight application servers to increase productivity.
 But, there are also some points, which are a total "no-go" for today's software development.
 
-* The IBM JDK is not developed anymore, because IBM joined the circle of firms, which support _AdoptOpenJDK_.
+* The IBM JDK is not developed anymore, because IBM joined the circle of organizations, which support _AdoptOpenJDK_.
   There is still support yet, but it will end in a few years, and as said no Java 9+ will be provided.
 * _tWAS 9.0.0.x_ does not get any updates anymore, only _tWAS 9.0.5.x_ (which can be used with a _Liberty_ core) is supported, but our operations department does not offer that versions.
 * The supported _JavaEE_ version of both servers, _tWAS 9.0.0.x_ and _BAW19_, are long outdated and libraries / APIs are not supported anymore.
@@ -110,13 +110,10 @@ In a containerized environment you could just deploy one replica of this "provid
 Another downside of queues is that the actual queues objects are somehow not connected to your system.
 Because of that, in our environment we check, if the related object (here XML file) has already been processed, right after the messages has been put out of the queue.
 
-**Open question**:
-How to use a _JMS_ inside a containerized environment?
-
-**JMS: Summary**:
 The _JMS_ takes away much work from you by providing an automated distribution and retry mechanic.
 It fits into our environment very well, where we have strong cuts between the processing steps.
 
+On open question I'll investigate somewhat later (not in this text) is how to use a _JMS_ queue inside a containerized environment.
 
 ## EventStores based on _JCA_ and _AS_
 
@@ -126,7 +123,7 @@ For every row a defined workflow business flow is called.
 
 ### The _EventStore_ table
 
-An _EventStore_ is a database table with a fixed column definition, which is shown below.
+An _EventStore_ is a database table with a fixed column definition of which the most important columns are shown below.
 
 ```text
 EventStore E1
@@ -135,8 +132,6 @@ EventStore E1
 | event_id  | object_id | object_name | event_status | connector_id |
 +-----------+-----------+-------------+--------------+--------------+
 ```
-
-Important columns are the following:
 
 * The  **event_id** is just the regular primary key of the table and therefore unique inside a table.
 * **object_id**: This column contains the primary key of an object (e.g. one single element which should be validated - see [process step 5](#process-description)).
@@ -147,6 +142,8 @@ Important columns are the following:
 * The **event_status** represents the current status of an event.
   It may contain the following values: 0 (outstanding), 1 (success, row gets deleted - _in reality you never see this status, because the deletion happens inside the same transaction_), 3 (in process), -1 (failed after maximum numbers of retries).
 * The **connector_id** is used as an identifier, which allows an _ActivationSpec_ to only select rows with a specific value, e.g. a node name.
+
+Next to the columns described here, there are more for priority, timeout and current processor.
 
 ### The _ActivationSpec_ definition
 
@@ -224,11 +221,11 @@ Maybe other adapters already exist and can be used in a standard Java Enterprise
 
 
 ## CQRS & Kafka
+This section is primarily based on the [official _Kafka_ website](https://kafka.apache.org/intro) and the corresponding section of Sebastian Daschner's book "Architecting Modern Java EE Applications".
+To understand what _Event Sourcing is, take a look at [Martin Fowler's article on _Event Sourcing_](https://martinfowler.com/eaaDev/EventSourcing.html).
 
 ### CQRS
-_Note: This section is based on the corresponding section of Sebastian Daschner's book "Architecting Modern Java EE Applications"_.
-
-The _Command Query Responsibility Segregation (CQRS)_ is an event-driven architecture based on event sourcing.
+The _Command Query Responsibility Segregation (CQRS)_ is an event-driven architecture based on _Event Sourcing_.
 An action that changes system's state (writes) is called a _command_, while an action that does not change the system's (read) is a _query_.
 In a _CQRS_ architecture every action must either be a command or a query, therefore only command system can create events, while both can consume them.
 The only connection between command and query services is an event store or event hub, which would be similar to the central database in a _Create Read Update Delete (CRUD)_-based system.
@@ -244,6 +241,37 @@ In contrast to that, even when the event hub is not available, the query service
 That is not true in a CRUD-based system, because the query services can't access the database.
 
 ### Kafka
+_Apache Kafka_ is a distributed message broker which provides publish/subscribe approach like JMS.
+On the official _Kafka_ website it claims to offer high performance and throughput.
+
+_Kafka_ organizes messages (events) in topics where consumer groups can subscribe to.
+Each message inside a topic is only consumed once per consumer group.
+
+Producers are those client applications that publish (write) events to Kafka, and consumers are those that subscribe to (read and process) these events.
+That means producers are command services, while consumers are query services in terms of _CQRS_.
+These functionalities are offered due the _Producers API_ and _Kafka Consumers API_.
+Next to these two API _Kafka_ offers an _Admin API_ to manage topics, clients etc., an _Stream API_ to implement stream processing of events, and a _Connect API_ with which e.g. services can receive every change to a database table.
 
 
 # Summary 
+As far as I understand, _Kafka_ offers functionality similar to JMS in easy-to-use APIs to produces or consume events.
+The segregation into different topics and consumer groups is quite similar to the several _EventStores_ or _JMS_ queues that are used at my work to distribute events to services which implement the related workflow.
+Of course, I expect using _Kafka_ for this allows a more harmonious / self-consistent integration, because developers can work with a more consistent API.
+The _Admin_ API seems to offer a built-in possibility to manage all related things, which has to be self-created otherwise.
+
+In terms of scaling and fault-tolerance, I don't see a real difference between _CQRS_ and an enterprise-ready database.
+It all about the ability to scale the database (in _CQRS_ the event hub) in which events are stored.
+Same for ability to increase fault-tolerance by running more than one instance (with synchronization of course).
+As far as I know enterprise-ready databases (e.g. _Oracle_) are scalable in a good way.
+As of now the database was never the bottleneck at my work so far, but external services out of our control. 
+Scaling the producers and consumers is, in my point of view, independent of the topic of topic investigated here.
+Containerized services (application services) are of course easier tp scale than traditional shared application servers.
+
+I see _CQRS_ (and _Kafka_ as one framework for it) as a good event-driven architecture, which we have implemented at my work in a very similar way.
+Most obvious difference is that we don't store each event permanent, but the whole state history, so we can track what happened to a single processed element.
+_Kafka_ could be an alternative at my work, but would mean to reimplement the whole distribution system.
+I think the distribution system we use itself is not our problem, because - regardless of using _Kafka_ or not - we would have to implement a way to read the events from the database.
+_Kafka's Connect API_ could be one way to do this, but implementing an own JCA resource-adapter would be another one (among others).
+
+_Kafka_ is not part of _Jakarta Enterprise Edition_ which would be against our goal to get independent of vendor-specific implementations.
+
